@@ -1,20 +1,24 @@
-import { Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
-
-import { GatewayService } from './gateway.service';
+import { lastValueFrom } from 'rxjs';
+import { ResultOutput } from './dto/result.output';
+import { SumDto } from './dto/sum.dto';
 
 @Controller()
 export class GatewayController {
-  constructor(
-    @Inject('MATH_SERVICE') private client: ClientProxy,
-    private readonly gatewayService: GatewayService,
-  ) {}
+  constructor(@Inject('MATH_SERVICE') private client: ClientProxy) {}
 
-  @Post()
-  math(): Observable<number> {
+  @Post('sum')
+  async math(@Body() data: SumDto): Promise<ResultOutput<number>> {
     const pattern = { cmd: 'sum' };
-    const payload = [1, 2, 3];
-    return this.client.send<number>(pattern, payload);
+
+    const result = await lastValueFrom(
+      this.client.send<number>(pattern, data.numbers),
+    );
+
+    return {
+      success: true,
+      result,
+    };
   }
 }

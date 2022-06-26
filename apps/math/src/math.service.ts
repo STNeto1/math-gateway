@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MathService {
-  getHello(): string {
-    return 'Hello World!';
+  sum(data: number[]): number {
+    return data.reduce((a, b) => a + b);
   }
 }

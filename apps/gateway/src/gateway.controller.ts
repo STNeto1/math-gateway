@@ -1,12 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Inject, Post } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
+
 import { GatewayService } from './gateway.service';
 
 @Controller()
 export class GatewayController {
-  constructor(private readonly gatewayService: GatewayService) {}
+  constructor(
+    @Inject('MATH_SERVICE') private client: ClientProxy,
+    private readonly gatewayService: GatewayService,
+  ) {}
 
-  @Get()
-  getHello(): string {
-    return this.gatewayService.getHello();
+  @Post()
+  math(): Observable<number> {
+    const pattern = { cmd: 'sum' };
+    const payload = [1, 2, 3];
+    return this.client.send<number>(pattern, payload);
   }
 }
